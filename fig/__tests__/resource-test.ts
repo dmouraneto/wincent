@@ -10,7 +10,7 @@ function withMeta(callback: () => void) {
             Context.currentAspect = 'meta';
             callback();
         } finally {
-            delete Context.currentAspect;
+            // delete Context.currentAspect;
         }
     };
 }
