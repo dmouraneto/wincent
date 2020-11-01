@@ -50,7 +50,6 @@ async function main() {
     }
 
     const project = await readProject(join(root, 'project.json'));
-
     const hostname = os.hostname();
 
     const profiles = project.profiles ?? {};
@@ -342,74 +341,11 @@ async function main() {
     }
 }
 
-async function loadAspect(aspect: Aspect): Promise<void> {
-    switch (aspect) {
-        case 'automator':
-            await import('../aspects/automator/index.js');
-            break;
-        case 'automount':
-            await import('../aspects/automount/index.js');
-            break;
-        case 'backup':
-            await import('../aspects/backup/index.js');
-            break;
-        case 'cron':
-            await import('../aspects/cron/index.js');
-            break;
-        case 'defaults':
-            await import('../aspects/defaults/index.js');
-            break;
-        case 'dotfiles':
-            await import('../aspects/dotfiles/index.js');
-            break;
-        case 'fonts':
-            await import('../aspects/fonts/index.js');
-            break;
-        case 'homebrew':
-            await import('../aspects/homebrew/index.js');
-            break;
-        case 'iterm':
-            await import('../aspects/iterm/index.js');
-            break;
-        case 'karabiner':
-            await import('../aspects/karabiner/index.js');
-            break;
-        case 'launchd':
-            await import('../aspects/launchd/index.js');
-            break;
-        case 'locale':
-            await import('../aspects/locale/index.js');
-            break;
-        case 'meta':
-            await import('../aspects/meta/index.js');
-            break;
-        case 'node':
-            await import('../aspects/node/index.js');
-            break;
-        case 'pacman':
-            await import('../aspects/pacman/index.js');
-            break;
-        case 'ruby':
-            await import('../aspects/ruby/index.js');
-            break;
-        case 'shell':
-            await import('../aspects/shell/index.js');
-            break;
-        case 'ssh':
-            await import('../aspects/ssh/index.js');
-            break;
-        case 'tampermonkey':
-            await import('../aspects/tampermonkey/index.js');
-            break;
-        case 'terminfo':
-            await import('../aspects/terminfo/index.js');
-            break;
-        case 'vim':
-            await import('../aspects/vim/index.js');
-            break;
-        default:
-            const unreachable: never = aspect;
-            throw new Error(`Unreachable ${unreachable}`);
+async function loadAspect(aspect: Aspect | string): Promise<void> {
+    try {
+        await import(`../aspects/${aspect}/index.js`);
+    } catch (e) {
+        throw new Error(`Unreachable ${aspect}`);
     }
 }
 
