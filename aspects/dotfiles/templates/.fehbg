@@ -1,4 +1,0 @@
-#!/bin/sh
-# <%= variables.figManaged %>
-
-feh --no-fehbg --bg-fill '<%= variables.home %>/.config/big-sur.jpg'

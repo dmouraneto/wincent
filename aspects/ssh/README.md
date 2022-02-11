@@ -1,1 +1,0 @@
-# Manages local SSH config

@@ -23,26 +23,16 @@ Plug 'preservim/nerdtree'
 Plug 'tpope/vim-commentary'
 Plug 'gruvbox-community/gruvbox'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-" Plug '/usr/local/opt/fzf'
-" Plug 'junegunn/fzf.vim'
-
-Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim'
+Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf.vim'
 Plug 'vimwiki/vimwiki'
 call plug#end()
 colorscheme gruvbox
 set background=dark
 
 let mapleader = " "
-
-nnoremap <C-p> <cmd>lua require('telescope.builtin').find_files({hidden=true})<cr>
-nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep()<cr>
-nnoremap <leader>fb <cmd>lua require('telescope.builtin').buffers()<cr>
-nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
-
-" nnoremap <C-p> :GFiles<CR>
-" nnoremap <Leader>pf :Files<CR>
+nnoremap <C-p> :GFiles<CR>
+nnoremap <Leader>pf :Files<CR>
 nnoremap <C-h> :wincmd h<CR>
 nnoremap <C-j> :wincmd j<CR>
 nnoremap <C-k> :wincmd k<CR>

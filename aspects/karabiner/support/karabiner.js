@@ -12,134 +12,7 @@ function fromTo(from, to) {
 }
 
 export function bundleIdentifier(identifier) {
-  return '^' + identifier.replace(/\./g, '\\.') + '$';
-}
-
-/**
- * For a given Colemak key (ie. the key I "think" I'm pressing), return
- * the corresponding Qwerty key on the physical keyboard (ie. the key
- * Karabiner-Elements needs to manipulate).
- */
-function colemak(key) {
-  return (
-    {
-      d: 'g',
-      e: 'k',
-      f: 'e',
-      g: 't',
-      i: 'l',
-      j: 'y',
-      k: 'n',
-      l: 'u',
-      n: 'j',
-      o: 'semicolon',
-      p: 'r',
-      r: 's',
-      s: 'd',
-      semicolon: 'p',
-      t: 'f',
-      u: 'i',
-      y: 'o',
-    }[key] || key
-  );
-}
-
-function launch(from, ...args) {
-  return [
-    {
-      from: {
-        simultaneous: [
-          {
-            key_code: colemak('n'), // mnemonic: "[n]ow", "[n]ew")
-          },
-          {
-            key_code: from,
-          },
-        ],
-        simultaneous_options: {
-          key_down_order: 'strict',
-          key_up_order: 'strict_inverse',
-        },
-      },
-      parameters: {
-        'basic.simultaneous_threshold_milliseconds': 500 /* Default: 1000 */,
-      },
-      to: [
-        {
-          shell_command: ['open', ...args].join(' '),
-        },
-      ],
-      type: 'basic',
-    },
-  ];
-}
-
-function spaceFN(from, to) {
-  return [
-    {
-      from: {
-        modifiers: {
-          optional: ['any'],
-        },
-        simultaneous: [
-          {
-            key_code: 'spacebar',
-          },
-          {
-            key_code: from,
-          },
-        ],
-        simultaneous_options: {
-          key_down_order: 'strict',
-          key_up_order: 'strict_inverse',
-          to_after_key_up: [
-            {
-              set_variable: {
-                name: 'SpaceFN',
-                value: 0,
-              },
-            },
-          ],
-        },
-      },
-      parameters: {
-        'basic.simultaneous_threshold_milliseconds': 500 /* Default: 1000 */,
-      },
-      to: [
-        {
-          set_variable: {
-            name: 'SpaceFN',
-            value: 1,
-          },
-        },
-        {
-          key_code: to,
-        },
-      ],
-      type: 'basic',
-    },
-    {
-      conditions: [
-        {
-          name: 'SpaceFN',
-          type: 'variable_if',
-          value: 1,
-        },
-      ],
-      from: {
-        key_code: from,
-        modifiers: {
-          optional: ['any'],
-        },
-      },
-      to: [
-        {
-          key_code: to,
-        },
-      ],
-      type: 'basic',
-    },
-  ];
+  return "^" + identifier.replace(/\./g, "\\.") + "$";
 }
 
 function swap(a, b) {
@@ -168,26 +41,24 @@ const APPLE_INTERNAL_US = {
   },
 };
 
-const REALFORCE = {
+const RAZER = {
   ...DEVICE_DEFAULTS,
   identifiers: {
     ...IDENTIFIER_DEFAULTS,
-    product_id: 273,
-    vendor_id: 2131,
+    product_id: 565,
+    vendor_id: 5426,
   },
   simple_modifications: [
-    ...swap('left_command', 'left_option'),
-    ...swap('right_command', 'right_option'),
-    ...fromTo('application', 'fn'),
-    ...fromTo('pause', 'power'),
+    ...swap("left_command", "left_option"),
+    ...swap("right_command", "right_option"),
   ],
 };
 
 const PARAMETER_DEFAULTS = {
-  'basic.simultaneous_threshold_milliseconds': 50,
-  'basic.to_delayed_action_delay_milliseconds': 500,
-  'basic.to_if_alone_timeout_milliseconds': 1000,
-  'basic.to_if_held_down_threshold_milliseconds': 500,
+  "basic.simultaneous_threshold_milliseconds": 50,
+  "basic.to_delayed_action_delay_milliseconds": 1000,
+  "basic.to_if_alone_timeout_milliseconds": 300,
+  "basic.to_if_held_down_threshold_milliseconds": 500,
 };
 
 const VANILLA_PROFILE = {
@@ -196,32 +67,18 @@ const VANILLA_PROFILE = {
     rules: [],
   },
   devices: [],
-  fn_function_keys: [
-    ...fromTo('f1', 'display_brightness_decrement'),
-    ...fromTo('f2', 'display_brightness_increment'),
-    ...fromTo('f3', 'mission_control'),
-    ...fromTo('f4', 'launchpad'),
-    ...fromTo('f5', 'illumination_decrement'),
-    ...fromTo('f6', 'illumination_increment'),
-    ...fromTo('f7', 'rewind'),
-    ...fromTo('f8', 'play_or_pause'),
-    ...fromTo('f9', 'fastforward'),
-    ...fromTo('f10', 'mute'),
-    ...fromTo('f11', 'volume_decrement'),
-    ...fromTo('f12', 'volume_increment'),
-  ],
-  name: 'Vanilla',
+  name: "Vanilla",
   selected: false,
   simple_modifications: [],
   virtual_hid_keyboard: {
     caps_lock_delay_milliseconds: 0,
-    keyboard_type: 'ansi',
+    keyboard_type: "ansi",
   },
 };
 
 export function isObject(item) {
   return (
-    item !== null && Object.prototype.toString.call(item) === '[object Object]'
+    item !== null && Object.prototype.toString.call(item) === "[object Object]"
   );
 }
 
@@ -255,7 +112,7 @@ export function visit(item, path, updater) {
     /^(?<root>\$)|\.(?<child>\w+)|\[(?<slice>.+?)\]|(?<done>$)/
   );
   const {
-    groups: {root, child, slice},
+    groups: { root, child, slice },
   } = match;
   const subpath = path.slice(match[0].length);
   if (root) {
@@ -270,7 +127,7 @@ export function visit(item, path, updater) {
     }
   } else if (slice) {
     const {
-      groups: {start, end},
+      groups: { start, end },
     } = slice.match(/^(?<start>\d+):(?<end>\d+)?$/);
     let array;
     for (let i = start, max = end == null ? item.length : end; i < max; i++) {
@@ -291,26 +148,22 @@ export function visit(item, path, updater) {
   }
 }
 
-const EXEMPTIONS = [
-  'com.factorio',
-  'com.feralinteractive.dirtrally',
-  'org.ioquake.ioquake3',
-];
+const EXEMPTIONS = [];
 
 function applyExemptions(profile) {
   const exemptions = {
-    type: 'frontmost_application_unless',
+    type: "frontmost_application_unless",
     bundle_identifiers: EXEMPTIONS.map(bundleIdentifier),
   };
 
   return visit(
     profile,
-    '$.complex_modifications.rules[0:].manipulators[0:].conditions',
+    "$.complex_modifications.rules[0:].manipulators[0:].conditions",
     (conditions) => {
       if (conditions) {
         if (
           conditions.some(
-            (condition) => condition.type === 'frontmost_application_if'
+            (condition) => condition.type === "frontmost_application_if"
           )
         ) {
           return conditions;
@@ -328,239 +181,114 @@ const DEFAULT_PROFILE = applyExemptions({
   complex_modifications: {
     parameters: {
       ...PARAMETER_DEFAULTS,
-      'basic.to_if_alone_timeout_milliseconds': 500 /* Default: 1000 */,
+      "basic.to_if_alone_timeout_milliseconds": 300 /* Default: 1000 */,
     },
     rules: [
-      // {
-      //     description: 'Launcher',
-      //     manipulators: [
-      //         ...launch(
-      //             colemak('c' /* [C]hrome */),
-      //             '-b',
-      //             'com.google.Chrome'
-      //         ),
-      //         ...launch(
-      //             colemak('d' /* To[d]o */),
-      //             '-b',
-      //             'com.culturedcode.ThingsMac'
-      //         ),
-      //         ...launch(
-      //             colemak('f' /* [F]inder */),
-      //             '-b',
-      //             'com.apple.Finder',
-      //             '~/Downloads'
-      //         ),
-      //         ...launch(
-      //             colemak('p' /* [p]asswords */),
-      //             '-b',
-      //             'com.agilebits.onepassword7'
-      //         ),
-      //         ...launch(
-      //             colemak('s' /* [S]lack */),
-      //             '-b',
-      //             'com.tinyspeck.slackmacgap'
-      //         ),
-      //         ...launch(
-      //             colemak('t' /* [t]erminal */),
-      //             '-b',
-      //             'com.googlecode.iterm2'
-      //         ),
-      //         ...launch(
-      //             colemak('w' /* [w]eek */),
-      //             '-b',
-      //             'com.flexibits.fantastical2.mac'
-      //         ),
-      //     ],
-      // },
       {
-        description: 'SpaceFN layer',
-        manipulators: [
-          ...spaceFN('b', 'spacebar'),
-          ...spaceFN('u', 'right_arrow'),
-          ...spaceFN('y', 'down_arrow'),
-          ...spaceFN('h', 'left_arrow'),
-          ...spaceFN('n', 'up_arrow'),
-          ...spaceFN('l', 'right_arrow'),
-          ...spaceFN('k', 'down_arrow'),
-          ...spaceFN('j', 'left_arrow'),
-          ...spaceFN('i', 'up_arrow'),
-        ],
-      },
-      {
-        description:
-          'Disable Karabiner-Elements with Fn+Control+Option+Command+Z',
         manipulators: [
           {
-            type: 'basic',
+            description:
+              "Change caps_lock to esc when used alone, to control when used as modifier.",
             from: {
-              key_code: 'z',
+              key_code: "caps_lock",
               modifiers: {
-                mandatory: [
-                  'fn',
-                  'left_control',
-                  'left_command',
-                  'left_option',
-                ],
+                optional: ["any"],
               },
             },
             to: [
               {
-                shell_command: 'open ~/bin/karabiner-kill.command',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        description:
-          'Change Caps Lock to Control when used as modifier, Backspace when used alone',
-        manipulators: [
-          {
-            from: {
-              key_code: 'caps_lock',
-              modifiers: {
-                optional: ['any'],
-              },
-            },
-            to: [
-              {
-                key_code: 'left_control',
-                lazy: true,
+                key_code: "left_control",
               },
             ],
             to_if_alone: [
               {
-                key_code: 'delete_or_backspace',
+                key_code: "escape",
               },
             ],
-            to_if_held_down: [
-              {
-                key_code: 'delete_or_backspace',
-              },
-            ],
-            type: 'basic',
+            type: "basic",
           },
         ],
       },
       {
-        description:
-          'Change Return to Control when used as modifier, Return when used alone',
+        description: "Change left_shift to ( when used alone.",
         manipulators: [
           {
             from: {
-              key_code: 'return_or_enter',
+              key_code: "left_shift",
               modifiers: {
-                optional: ['any'],
+                optional: ["any"],
               },
             },
             to: [
               {
-                key_code: 'right_control',
-                lazy: true,
+                key_code: "left_shift",
               },
             ],
             to_if_alone: [
               {
-                key_code: 'return_or_enter',
+                key_code: "9",
+                modifiers: ["left_shift"],
               },
             ],
-            to_if_held_down: [
-              {
-                key_code: 'return_or_enter',
-              },
-            ],
-            type: 'basic',
+            type: "basic",
           },
         ],
       },
       {
-        description: 'Change Control+I to F6 in Vim',
+        description: "Change right_shift to ) when used alone.",
         manipulators: [
           {
-            conditions: [
-              {
-                bundle_identifiers: [
-                  // Note: See ~/.config/kitty/kitty.conf for why this isn't
-                  // needed in Kitty.
-                  bundleIdentifier('com.apple.Terminal'),
-                  bundleIdentifier('com.googlecode.iterm2'),
-                ],
-                type: 'frontmost_application_if',
-              },
-            ],
             from: {
-              key_code: 'l',
+              key_code: "right_shift",
               modifiers: {
-                mandatory: ['control'],
-                optional: ['any'],
+                optional: ["any"],
               },
             },
             to: [
               {
-                key_code: 'f6',
-                modifiers: ['fn'],
+                key_code: "right_shift",
               },
             ],
-            type: 'basic',
+            to_if_alone: [
+              {
+                key_code: "0",
+                modifiers: ["right_shift"],
+              },
+            ],
+            type: "basic",
           },
         ],
       },
       {
-        description: 'Left and Right Shift together toggle Caps Lock',
+        description: "Equals plus delete together to forward delete",
         manipulators: [
           {
             from: {
               modifiers: {
-                optional: ['any'],
+                optional: ["any"],
               },
               simultaneous: [
                 {
-                  key_code: 'left_shift',
+                  key_code: "equal_sign",
                 },
                 {
-                  key_code: 'right_shift',
+                  key_code: "delete_or_backspace",
                 },
               ],
             },
             to: [
               {
-                key_code: 'caps_lock',
+                key_code: "delete_forward",
               },
             ],
-            type: 'basic',
-          },
-        ],
-      },
-      {
-        description: 'Equals plus delete together to forward delete',
-        manipulators: [
-          {
-            from: {
-              modifiers: {
-                optional: ['any'],
-              },
-              simultaneous: [
-                {
-                  key_code: 'equal_sign',
-                },
-                {
-                  key_code: 'delete_or_backspace',
-                },
-              ],
-            },
-            to: [
-              {
-                key_code: 'delete_forward',
-              },
-            ],
-            type: 'basic',
+            type: "basic",
           },
         ],
       },
     ],
   },
-  devices: [REALFORCE, APPLE_INTERNAL_US],
-  name: 'Default',
+  devices: [RAZER, APPLE_INTERNAL_US],
+  name: "Default",
   selected: true,
 });
 
@@ -573,6 +301,6 @@ const CONFIG = {
   profiles: [DEFAULT_PROFILE, VANILLA_PROFILE],
 };
 
-if (process.argv.includes('--emit-karabiner-config')) {
-  process.stdout.write(JSON.stringify(CONFIG, null, 2) + '\n');
+if (process.argv.includes("--emit-karabiner-config")) {
+  process.stdout.write(JSON.stringify(CONFIG, null, 2) + "\n");
 }

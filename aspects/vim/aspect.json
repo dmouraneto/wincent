@@ -1,0 +1,6 @@
+{
+  "description": "Configures Vim",
+  "variables": {
+    "files": [".vim"]
+  }
+}

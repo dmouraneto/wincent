@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =8
+let g:netrw_dirhist_8='/Users/dmoura/Documents/projetos/dmouraneto/aspects/vim'
+let g:netrw_dirhist_7='/Users/dmoura/Documents/projetos/dmouraneto/aspects'
+let g:netrw_dirhist_6='/Users/dmoura/Documents/projetos/dmouraneto'
+let g:netrw_dirhist_5='/Users/dmoura/Documents/projetos/dmouraneto/aspects/vim'
+let g:netrw_dirhist_4='/Users/dmoura/Documents/projetos/dmouraneto/aspects/vim/files'
+let g:netrw_dirhist_3='/Users/dmoura/Documents/projetos/dmouraneto/aspects/vim'
+let g:netrw_dirhist_2='/Users/dmoura/Documents/projetos/dmouraneto/aspects'
+let g:netrw_dirhist_1='/Users/dmoura/Documents/projetos/dmouraneto'
