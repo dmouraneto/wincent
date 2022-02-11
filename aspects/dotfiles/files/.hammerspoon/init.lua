@@ -18,7 +18,6 @@ local handleWindowEvent = nil
 local hide = nil
 local initEventHandling = nil
 local internalDisplay = nil
-local prepareScreencast = nil
 local tearDownEventHandling = nil
 local windowCount = nil
 
@@ -92,8 +91,26 @@ local layoutConfig = {
     end
   end),
 
+  ['com.microsoft.edgemac'] = (function(window, forceScreenCount)
+    local count = forceScreenCount or screenCount
+    if count == 1 then
+      hs.grid.set(window, grid.fullScreen)
+    else
+      hs.grid.set(window, grid.fullScreen, hs.screen.primaryScreen())
+    end
+  end),
+
   ['com.tinyspeck.slackmacgap'] = (function(window)
     hs.grid.set(window, grid.fullScreen, internalDisplay())
+  end),
+
+  ['net.kovidgoyal.kitty'] = (function(window, forceScreenCount)
+    local count = forceScreenCount or screenCount
+    if count == 1 then
+      hs.grid.set(window, grid.fullScreen)
+    else
+      hs.grid.set(window, grid.fullScreen, hs.screen.primaryScreen())
+    end
   end),
 }
 
@@ -141,14 +158,19 @@ canManageWindow = (function(window)
     bundleID == 'com.googlecode.iterm2'
 end)
 
-local macBookAir13 = '1440x900'
-local macBookPro15_2015 = '1440x900'
-local macBookPro15_2019 = '1680x1050'
+local benQPD2700U = '1920x1080'
+local macBookPro13 = '1440x900'
+local macBookPro15 = '1440x900'
+
 local samsung_S24C450 = '1920x1200'
 
+externalDisplay = (function()
+  return hs.screen.find(benQPD2700U)
+end)
+
 internalDisplay = (function()
-  return hs.screen.find(macBookPro15_2015) or
-    hs.screen.find(macBookPro15_2019)
+  return hs.screen.find(macBookPro13) or
+    hs.screen.find(macBookPro15)
 end)
 
 activateLayout = (function(forceScreenCount)
@@ -315,35 +337,17 @@ hs.hotkey.bind({'ctrl', 'alt', 'cmd'}, 'f4', (function()
   reloader.reload()
 end))
 
---
--- Screencast layout
---
-
-prepareScreencast = (function()
-  local screen = 'Color LCD'
-  local top = {x=0, y=0, w=1, h=.92}
-  local bottom = {x=.4, y=.82, w=.5, h=.1}
-  local windowLayout = {
-    {'iTerm2', nil, screen, top, nil, nil},
-    {'Google Chrome', nil, screen, top, nil, nil},
-    {'KeyCastr', nil, screen, bottom, nil, nil},
-  }
-
-  hs.application.launchOrFocus('KeyCastr')
-  local chrome = hs.appfinder.appFromName('Google Chrome')
-  local iterm = hs.appfinder.appFromName('iTerm2')
-  for key, app in pairs(hs.application.runningApplications()) do
-    if app == chrome or app == iterm or app:name() == 'KeyCastr' then
-      app:unhide()
-    else
-      app:hide()
-    end
-  end
-  hs.layout.apply(windowLayout)
+hs.hotkey.bind('alt', 'v', function()
+  hs.applescript [[
+    tell application "System Events" to tell process "Finder"
+      set frontmost to true
+      tell menu bar item "Edit" of menu bar 1
+        click
+        click menu item "Show Clipboard" of menu 1
+      end tell
+    end tell
+  ]]
 end)
-
--- `open hammerspoon://screencast`
-hs.urlevent.bind('screencast', prepareScreencast)
 
 iterm.init()
 reloader.init()

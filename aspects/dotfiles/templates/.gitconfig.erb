@@ -1,7 +1,8 @@
+<%# vim: set filetype=eruby.gitconfig : -%>
 # <%= variables.figManaged %>
 
 [alias]
-	abbrev = !sh -c 'git rev-parse --short ${1-`echo HEAD`}' -
+	abbrev = !bash -c 'git rev-parse --short ${1-`echo HEAD`}' -
 	ack = grep --break --heading
 	amend = commit --amend -v
 	both = diff --ignore-submodules=dirty HEAD
@@ -10,17 +11,19 @@
 	co = checkout
 	count = !git --no-pager log --oneline | wc -l
 	cp = cherry-pick
+	delta = "!f() { git diff \"$@\" | delta; }; f"
 
 	# http://stackoverflow.com/questions/224687/git-find-duplicate-blobs-files-in-this-tree/8408640#8408640
 	dupes = !"git ls-tree -r HEAD | cut -c 13- | sort | uniq -D -w 40"
 
 	ff = merge --ff-only
-	fixup = !sh -c 'git commit --fixup=$1 ${@:2}' -
+	find = "!f() { git ls-files | grep \"$@\"; }; f"
+	fixup = !bash -c 'git commit --fixup=$1 ${@:2}' -
 	fresh = remote update --prune
 	full = show --format=fuller
 
 	# Shortcut for updating all remotes and fast-forwarding to a specific one:
-	# eg. `git get upstream/master`
+	# eg. `git get upstream/main`
 	get = "!f() { git fresh && git ff \"$@\"; }; f"
 
 	# equivalent to: graph --all
@@ -49,7 +52,7 @@
 	reword = commit --amend --only -v --
 
 	# requires Git 1.6.2 or later
-	rollback = !sh -c 'git reset --merge HEAD~${1-1}' -
+	rollback = !bash -c 'git reset --merge HEAD~${1-1}' -
 
 	# "smartlog", although it's not that smart.
 	# Equivalent to `git graph --all --simplify-by-decoration.
@@ -70,12 +73,13 @@
 	# usage: git wd [diff-against=HEAD] [max-depth=4]
 	wd = "!f() { git --paginate diff --dirstat=cumulative,files,0 ${1:-HEAD} | awk '{print $2}' | cut -d / -f1-${2:-4} | sort | uniq; }; f"
 
+	# same as wd ("what directories?") but for files ("what files?")
+	# usage: git wd [diff-against=HEAD]
+	wf = "!f() { git --paginate diff --stat=10000 ${1:-HEAD} | awk '{print $1}' | sed '$d' | sort; }; f"
+
 [branch]
 	autosetupmerge = always
 	autosetuprebase = local
-
-[branch "master"]
-	rebase = true
 
 [color]
 	ui = auto
@@ -102,6 +106,10 @@
 	# (In the absence LESS, Git would use "FRX".)
 	pager = less -S
 
+[delta]
+	max-line-length = 0
+	line-numbers = true
+
 # ignored by Git older than 1.8.2
 [diff]
 	algorithm = histogram
@@ -111,6 +119,12 @@
 
 [difftool]
 	prompt = false
+
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
 <%- if (variables.gitHubUsername) { -%>
 
 [github]
@@ -126,6 +140,10 @@
 [help]
 	autocorrect = 2
 
+[init]
+	# requires Git 2.28 or later
+	defaultBranch = main
+
 [interactive]
 	diffFilter = diff-highlight
 
@@ -133,7 +151,7 @@
 	decorate = short
 
 [merge]
-	conflictStyle = diff3
+	conflictStyle = <%= variables.gitMergeConflictStyle %>
 	log = 1000
 
 [pager]
@@ -148,6 +166,9 @@
 	# Added in Git 2.18.0.
 	version = 2
 
+[pull]
+	ff = only
+
 [push]
 	# Added in Git 1.7.11, default in 2.0, but still required (to avoid warning).
 	default = simple
@@ -157,14 +178,6 @@
 
 [rerere]
 	enabled = true
-
-[sendemail]
-	smtpEncryption = tls
-	smtpServer = smtp.gmail.com
-	smtpServerPort = 587
-<%- if (variables.gitUserEmail) { -%>
-	smtpUser = <%= variables.gitUserEmail %>
-<%- } -%>
 
 [status]
 	submodulesummary = true
@@ -181,6 +194,7 @@
 	name = <%= variables.gitUserName %>
 <%- } -%>
 
-# ignored by Git older than 1.7.10
+# Ignored by Git older than 1.7.10.
 [include]
 	path = .gitconfig.local
+	path = <%= variables.gitHostSpecificInclude %>

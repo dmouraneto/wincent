@@ -31,6 +31,7 @@ function files() {
 #     - `git` with no arguments = `git status`; run `git help` to show what
 #       vanilla `git` without arguments would normally show.
 #     - `git root` = `cd` to repo root.
+#     - `ROOT=$(git root)` = no args and stdout is not a tty; prints the root.
 #     - `git root ARG...` = evals `ARG...` from the root (eg. `git root ls`).
 #     - `git ARG...` = behaves just like normal `git` command.
 #
@@ -58,10 +59,14 @@ function git() {
       fi
     fi
     if [ -z "$ROOT" ]; then
-      ROOT=.
+      ROOT="$PWD"
     fi
     if [ $# -eq 0 ]; then
-      cd "$ROOT"
+      if [ -t 1 ]; then
+        cd "$ROOT"
+      else
+        echo "$ROOT"
+      fi
     else
       (cd "$ROOT" && eval "$@")
     fi
@@ -90,17 +95,6 @@ function history() {
 
   # This is a function because Zsh aliases can't take arguments.
   fc -l 1
-}
-
-function mvim() {
-  emulate -L zsh
-
-  # Makes user-installed fonts visible to MacVim.
-  if which reattach-to-user-namespace &> /dev/null ; then
-    reattach-to-user-namespace mvim
-  else
-    command mvim
-  fi
 }
 
 function scratch() {
@@ -153,7 +147,7 @@ function tmux() {
   # Check for .tmux file (poor man's Tmuxinator).
   if [ -x .tmux ]; then
     # Prompt the first time we see a given .tmux file before running it.
-    local DIGEST="$(openssl sha -sha512 .tmux)"
+    local DIGEST="$(openssl sha512 .tmux)"
     if ! grep -q "$DIGEST" ~/..tmux.digests 2> /dev/null; then
       cat .tmux
       read -k 1 -r \
@@ -177,10 +171,12 @@ function tmux() {
 
 # Bounce the Dock icon, if iTerm does not have focus.
 function bounce() {
-  if [ -n "$TMUX" ]; then
-    print -Pn "\ePtmux;\e\e]1337;RequestAttention=1\a\e\\"
-  else
-    print -Pn "\e]1337;RequestAttention=1\a"
+  if [ -n "$ITERM_SESSION_ID" ]; then
+    if [ -n "$TMUX" ]; then
+      print -Pn "\ePtmux;\e\e]1337;RequestAttention=1\a\e\\"
+    else
+      print -Pn "\e]1337;RequestAttention=1\a"
+    fi
   fi
 }
 
@@ -256,6 +252,14 @@ compctl -f -K _jump_complete jump
 #
 function subtree() {
   tree -a --prune -P "$@"
+}
+
+function swallow() {
+  local ARGS=$*
+  local ID=$(xdo id)
+  xdo hide
+  eval "$*" &> /dev/null
+  xdo show "$ID"
 }
 
 # "[t]ime[w]arp" by setting GIT_AUTHOR_DATE and GIT_COMMITTER_DATE.

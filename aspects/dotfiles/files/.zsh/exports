@@ -14,32 +14,20 @@ else
   export EDITOR=vim
 fi
 
-if [ -d /usr/local/opt/mysql@5.7 ]; then
-  # Uncomment if you need to build anything that links against this version:
-  # export LDFLAGS="-L/usr/local/opt/mysql@5.7/lib"
-  # export CPPFLAGS="-I/usr/local/opt/mysql@5.7/include"
-  # export PKG_CONFIG_PATH="/usr/local/opt/mysql@5.7/lib/pkgconfig"
-fi
-
 case "$(uname)" in
   Darwin*)
     if [ -x /usr/libexec/java_home ]; then
       if /usr/libexec/java_home &> /dev/null ; then
-        export ANT_OPTS="-Xmx4096m -Xms4096m -XX:MaxPermSize=1024m -XX:-UseGCOverheadLimit -Dorg.gradle.workers.max=4"
-        export GRADLE_OPTS="-Dorg.gradle.workers.max=4"
-
         if /usr/libexec/java_home -v1.8.0 &> /dev/null; then
           export JAVA_HOME=$(/usr/libexec/java_home -v1.8.0)
         else
           export JAVA_HOME=$(/usr/libexec/java_home)
         fi
-
-        export JAVA_OPTS="-Xmx4096m -Xms1024m -XX:MaxPermSize=512m"
       fi
     fi
     ;;
   Linux*)
-    export JAVA_HOME=/usr/lib/jvm/jre-1.6.0-openjdk.x86_64
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk
     ;;
 esac
 
@@ -140,17 +128,20 @@ export FTP_PASSIVE=1
 # colour ls listings
 export CLICOLOR=true
 
-# for Amazon Web Services EC2 API
-export EC2_HOME=~/bin/ec2-api-tools
-export EC2_PRIVATE_KEY=~/.ssh/ec2wincent_cert_pk.pem
-export EC2_CERT=~/.ssh/ec2wincent_cert.pem
-
 export GPG_TTY=$(tty)
 
 export GOPATH=~/code/go
 
+# See: https://docs.brew.sh/Analytics
+export HOMEBREW_NO_ANALYTICS=1
+
+if [ -d /opt/homebrew ]; then
+  export HOMEBREW_PREFIX="/opt/homebrew"
+  export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+  export HOMEBREW_NO_AUTO_UPDATE=1
+  export HOMEBREW_REPOSITORY="/opt/homebrew"
+fi
+
 export RIPGREP_CONFIG_PATH=$HOME/.rgrc
 
 test -e $HOME/.zsh/exports.private && source $HOME/.zsh/exports.private
-
-test -d $HOME/n && export N_PREFIX="$HOME/n"

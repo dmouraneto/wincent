@@ -1,6 +1,0 @@
-{
-    "description": "Configures Vim",
-    "variables": {
-        "files": [".gvimrc", ".vim"]
-    }
-}

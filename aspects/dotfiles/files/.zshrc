@@ -112,7 +112,6 @@ colors
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git hg
 zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' disable-patterns "${(b)HOME}/code/(portal|portal-ee|portal-master)(|/*)"
 zstyle ':vcs_info:*' stagedstr "%F{green}●%f" # default 'S'
 zstyle ':vcs_info:*' unstagedstr "%F{red}●%f" # default 'U'
 zstyle ':vcs_info:*' use-simple true
@@ -172,11 +171,8 @@ function () {
     # or not in a tmux session.
     local LVL=$SHLVL
   fi
-  if [[ $EUID -eq 0 ]]; then
-    local SUFFIX='%F{yellow}%n%f'$(printf '%%F{yellow}\u276f%.0s%%f' {1..$LVL})
-  else
-    local SUFFIX=$(printf '%%F{red}\u276f%.0s%%f' {1..$LVL})
-  fi
+  local SUFFIX='%(!.%F{yellow}%n%f.)%(!.%F{yellow}.%F{red})'$(printf '\u276f%.0s' {1..$LVL})'%f'
+
   export PS1="%F{green}${SSH_TTY:+%n@%m}%f%B${SSH_TTY:+:}%b%F{blue}%B%1~%b%F{yellow}%B%(1j.*.)%(?..!)%b%f %B${SUFFIX}%b "
   if [[ -n "$TMUXING" ]]; then
     # Outside tmux, ZLE_RPROMPT_INDENT ends up eating the space after PS1, and
@@ -233,6 +229,7 @@ select-word-style bash # only alphanumeric chars are considered WORDCHARS
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=59'
+ZSH_AUTOSUGGEST_STRATEGY=(match_prev_cmd completion)
 
 # NOTE: must come after select-word-style.
 source ~/.zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
@@ -262,8 +259,13 @@ if tput cbt &> /dev/null; then
   bindkey "$(tput cbt)" reverse-menu-complete # make Shift-tab go to previous completion
 fi
 
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+if [[ $(uname -a) =~ "Ubuntu" ]]; then
+  bindkey "$key[Up]" history-substring-search-up
+  bindkey "$key[Down]" history-substring-search-down
+else
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
+fi
 bindkey '^P' history-substring-search-up
 bindkey '^N' history-substring-search-down
 bindkey -M vicmd 'k' history-substring-search-up
@@ -291,17 +293,30 @@ function fg-bg() {
 zle -N fg-bg
 bindkey '^Z' fg-bg
 
+# Mac-like wordwise movement (Opt/Super plus left/right) in Kitty.
+bindkey "^[[1;3C" forward-word # For macOS.
+bindkey "^[[1;3D" backward-word # For macOS.
+bindkey "^[[1;5C" forward-word # For Arch.
+bindkey "^[[1;5D" backward-word # For Arch.
+
+#
+# Other prerequisites before we set up `$PATH`.
+#
+
+test -d $HOME/n && export N_PREFIX="$HOME/n"
+
 #
 # Other
 #
 
+source $HOME/.zsh/path # Must come first! (Others depend on it.)
+
 source $HOME/.zsh/aliases
 source $HOME/.zsh/common
-source $HOME/.zsh/colors
+source $HOME/.zsh/color
 source $HOME/.zsh/exports
 source $HOME/.zsh/functions
 source $HOME/.zsh/hash
-source $HOME/.zsh/path
 source $HOME/.zsh/vars
 
 #
@@ -461,6 +476,8 @@ zstyle ':chpwd:*' recent-dirs-default true
 LOCAL_RC=$HOME/.zshrc.local
 test -f $LOCAL_RC && source $LOCAL_RC
 
+# If your hostname ever gets unset on macOS, reset with:
+#   sudo scutil --set HostName $desired-host-name
 HOST_RC=$HOME/.zsh/host/$(hostname -s | tr '[:upper:]' '[:lower:]')
 test -f $HOST_RC && source $HOST_RC
 

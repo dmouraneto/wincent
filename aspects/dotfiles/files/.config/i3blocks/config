@@ -7,20 +7,25 @@
 
 
 # Global properties
+command=~/.config/i3blocks/blocks/$BLOCK_NAME
 separator=true
-separator_block_width=15
+separator_block_width=50
 
-[documentation]
-full_text=Documentation
-website=https://vivien.github.io/i3blocks
-command=xdg-open "$website"
-color=#f12711
-
-[greetings]
+[host]
 color=#f5af19
-command=echo "Hello, $USER!"
+# icon = fa-desktop \uf108
+command=echo "  $(hostname -s)"
 interval=once
 
+[ip]
+color=#aaaaaa
+# icon = fa-server \uf233
+command=echo "  $(hostname -i)"
+interval=once
+
+[traffic]
+interval=5
+markup=pango
+
 [time]
-command=date '+%Y-%m-%d %H:%M:%S'
 interval=1
