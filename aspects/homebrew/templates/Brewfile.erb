@@ -3,7 +3,10 @@
 brew "ack"
 brew "gh"
 brew "cmake"
+brew "colima"
 brew "cscope"
+brew "docker"
+brew "docker-compose"
 brew "fzf"
 brew "gdbm"
 brew "gettext"
@@ -32,15 +35,13 @@ brew "unibilium"
 brew "yarn"
 
 <%- if (variables.profile === 'work') { -%>
-brew "msodbcsql17"
-brew "mssql-tools"
 brew "msgpack"
-brew "msodbcsql"
 brew "postgresql"
 <%- } -%>
 
-cask "docker"
+cask "dbeaver-community"
 cask "font-hack"
 cask "iterm2"
 cask "karabiner-elements"
 cask "rectangle"
+cask "visual-studio-code"
