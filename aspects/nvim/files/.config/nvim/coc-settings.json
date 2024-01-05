@@ -1,0 +1,6 @@
+{
+    "diagnostic.virtualText": true,
+    "diagnostic.virtualTextCurrentLineOnly": true,
+    "coc.preferences.formatOnSaveFiletypes": ["typescript"],
+    "Lua.diagnostics.globals": ["vim"]
+}
