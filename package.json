@@ -7,12 +7,12 @@
   "repository": "https://github.com/wincent/wincent.git",
   "author": "Greg Hurrell <greg@hurrell.net>",
   "license": "Unlicense",
+  "type": "module",
   "scripts": {
     "ci": "yarn format:check",
     "format:check": "npx prettier --check \"**/*.{js,json,md,ts}\" \"*.{md,ts}\"",
     "format": "npx prettier --write \"**/*.{js,json,md,ts}\" \"*.{md,ts}\""
   },
-  "type": "module",
   "dependencies": {
     "typescript": "*"
   },

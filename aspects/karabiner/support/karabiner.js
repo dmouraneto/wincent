@@ -12,7 +12,7 @@ function fromTo(from, to) {
 }
 
 export function bundleIdentifier(identifier) {
-  return "^" + identifier.replace(/\./g, "\\.") + "$";
+  return '^' + identifier.replace(/\./g, '\\.') + '$';
 }
 
 function swap(a, b) {
@@ -24,7 +24,8 @@ const DEVICE_DEFAULTS = {
   fn_function_keys: [],
   ignore: false,
   manipulate_caps_lock_led: true,
-  simple_modifications: [],
+  simple_modifications: [
+  ],
 };
 
 const IDENTIFIER_DEFAULTS = {
@@ -49,16 +50,16 @@ const RAZER = {
     vendor_id: 5426,
   },
   simple_modifications: [
-    ...swap("left_command", "left_option"),
-    ...swap("right_command", "right_option"),
+    ...swap('left_command', 'left_option'),
+    ...swap('right_command', 'right_option'),
   ],
 };
 
 const PARAMETER_DEFAULTS = {
-  "basic.simultaneous_threshold_milliseconds": 50,
-  "basic.to_delayed_action_delay_milliseconds": 1000,
-  "basic.to_if_alone_timeout_milliseconds": 300,
-  "basic.to_if_held_down_threshold_milliseconds": 500,
+  'basic.simultaneous_threshold_milliseconds': 50,
+  'basic.to_delayed_action_delay_milliseconds': 1000,
+  'basic.to_if_alone_timeout_milliseconds': 300,
+  'basic.to_if_held_down_threshold_milliseconds': 500,
 };
 
 const VANILLA_PROFILE = {
@@ -67,18 +68,18 @@ const VANILLA_PROFILE = {
     rules: [],
   },
   devices: [],
-  name: "Vanilla",
+  name: 'Vanilla',
   selected: false,
   simple_modifications: [],
   virtual_hid_keyboard: {
     caps_lock_delay_milliseconds: 0,
-    keyboard_type: "ansi",
+    keyboard_type: 'ansi',
   },
 };
 
 export function isObject(item) {
   return (
-    item !== null && Object.prototype.toString.call(item) === "[object Object]"
+    item !== null && Object.prototype.toString.call(item) === '[object Object]'
   );
 }
 
@@ -112,7 +113,7 @@ export function visit(item, path, updater) {
     /^(?<root>\$)|\.(?<child>\w+)|\[(?<slice>.+?)\]|(?<done>$)/
   );
   const {
-    groups: { root, child, slice },
+    groups: {root, child, slice},
   } = match;
   const subpath = path.slice(match[0].length);
   if (root) {
@@ -127,7 +128,7 @@ export function visit(item, path, updater) {
     }
   } else if (slice) {
     const {
-      groups: { start, end },
+      groups: {start, end},
     } = slice.match(/^(?<start>\d+):(?<end>\d+)?$/);
     let array;
     for (let i = start, max = end == null ? item.length : end; i < max; i++) {
@@ -152,18 +153,18 @@ const EXEMPTIONS = [];
 
 function applyExemptions(profile) {
   const exemptions = {
-    type: "frontmost_application_unless",
+    type: 'frontmost_application_unless',
     bundle_identifiers: EXEMPTIONS.map(bundleIdentifier),
   };
 
   return visit(
     profile,
-    "$.complex_modifications.rules[0:].manipulators[0:].conditions",
+    '$.complex_modifications.rules[0:].manipulators[0:].conditions',
     (conditions) => {
       if (conditions) {
         if (
           conditions.some(
-            (condition) => condition.type === "frontmost_application_if"
+            (condition) => condition.type === 'frontmost_application_if'
           )
         ) {
           return conditions;
@@ -181,114 +182,154 @@ const DEFAULT_PROFILE = applyExemptions({
   complex_modifications: {
     parameters: {
       ...PARAMETER_DEFAULTS,
-      "basic.to_if_alone_timeout_milliseconds": 300 /* Default: 1000 */,
+      'basic.to_if_alone_timeout_milliseconds': 300 /* Default: 1000 */,
     },
     rules: [
       {
         manipulators: [
           {
             description:
-              "Change caps_lock to esc when used alone, to control when used as modifier.",
+              'Change caps_lock to esc when used alone, to control when used as modifier.',
             from: {
-              key_code: "caps_lock",
+              key_code: 'caps_lock',
               modifiers: {
-                optional: ["any"],
+                optional: ['any'],
               },
             },
             to: [
               {
-                key_code: "left_control",
+                key_code: 'left_control',
               },
             ],
             to_if_alone: [
               {
-                key_code: "escape",
+                key_code: 'escape',
               },
             ],
-            type: "basic",
+            type: 'basic',
           },
         ],
       },
       {
-        description: "Change left_shift to ( when used alone.",
+        description: 'Change left_shift to ( when used alone.',
         manipulators: [
           {
             from: {
-              key_code: "left_shift",
+              key_code: 'left_shift',
               modifiers: {
-                optional: ["any"],
+                optional: ['any'],
               },
             },
             to: [
               {
-                key_code: "left_shift",
+                key_code: 'left_shift',
               },
             ],
             to_if_alone: [
               {
-                key_code: "9",
-                modifiers: ["left_shift"],
+                key_code: '9',
+                modifiers: ['left_shift'],
               },
             ],
-            type: "basic",
+            type: 'basic',
           },
         ],
       },
       {
-        description: "Change right_shift to ) when used alone.",
+        description: 'Change right_shift to ) when used alone.',
         manipulators: [
           {
             from: {
-              key_code: "right_shift",
+              key_code: 'right_shift',
               modifiers: {
-                optional: ["any"],
+                optional: ['any'],
               },
             },
             to: [
               {
-                key_code: "right_shift",
+                key_code: 'right_shift',
               },
             ],
             to_if_alone: [
               {
-                key_code: "0",
-                modifiers: ["right_shift"],
+                key_code: '0',
+                modifiers: ['right_shift'],
               },
             ],
-            type: "basic",
+            type: 'basic',
           },
         ],
       },
       {
-        description: "Equals plus delete together to forward delete",
+        description: 'Change home to start of line.',
+        manipulators: [
+          {
+            from: {
+              key_code: 'home',
+              modifiers: {
+                optional: ['any'],
+              },
+            },
+            to: [
+              {
+                key_code: 'left_arrow',
+                modifiers: ['left_command'],
+              },
+            ],
+            type: 'basic',
+          },
+        ],
+      },
+      {
+        description: 'Change end to end of line.',
+        manipulators: [
+          {
+            from: {
+              key_code: 'end',
+              modifiers: {
+                optional: ['any'],
+              },
+            },
+            to: [
+              {
+                key_code: 'right_arrow',
+                modifiers: ['left_command'],
+              },
+            ],
+            type: 'basic',
+          },
+        ],
+      },
+      {
+        description: 'Equals plus delete together to forward delete',
         manipulators: [
           {
             from: {
               modifiers: {
-                optional: ["any"],
+                optional: ['any'],
               },
               simultaneous: [
                 {
-                  key_code: "equal_sign",
+                  key_code: 'equal_sign',
                 },
                 {
-                  key_code: "delete_or_backspace",
+                  key_code: 'delete_or_backspace',
                 },
               ],
             },
             to: [
               {
-                key_code: "delete_forward",
+                key_code: 'delete_forward',
               },
             ],
-            type: "basic",
+            type: 'basic',
           },
         ],
       },
     ],
   },
   devices: [RAZER, APPLE_INTERNAL_US],
-  name: "Default",
+  name: 'Default',
   selected: true,
 });
 
@@ -301,6 +342,6 @@ const CONFIG = {
   profiles: [DEFAULT_PROFILE, VANILLA_PROFILE],
 };
 
-if (process.argv.includes("--emit-karabiner-config")) {
-  process.stdout.write(JSON.stringify(CONFIG, null, 2) + "\n");
+if (process.argv.includes('--emit-karabiner-config')) {
+  process.stdout.write(JSON.stringify(CONFIG, null, 2) + '\n');
 }
