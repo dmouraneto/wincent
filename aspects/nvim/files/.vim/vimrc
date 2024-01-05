@@ -1,10 +1,13 @@
 set number " show current line number
 set relativenumber " use relative line numbers
 set nohlsearch " dont highlight matched searches
+
 set autoindent
+autocmd FileType php setlocal autoindent
+
 set smartindent
-set tabstop=2
-set shiftwidth=2
+set tabstop=4
+set shiftwidth=4
 set expandtab
 set nowrap
 set noswapfile
@@ -29,16 +32,29 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
+Plug 'ThePrimeagen/harpoon'
 Plug 'vimwiki/vimwiki'
+
+" Plug 'github/copilot.vim'
+
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/playground'
+Plug 'ThePrimeagen/refactoring.nvim'
+Plug 'mfussenegger/nvim-dap'
+Plug 'mxsdev/nvim-dap-vscode-js'
+Plug 'theHamsta/nvim-dap-virtual-text'
+Plug 'rcarriga/nvim-dap-ui'
 call plug#end()
 colorscheme gruvbox
 set background=dark
 
 let mapleader = " "
 
-nnoremap <C-p> <cmd>lua require('telescope.builtin').find_files({hidden=true})<cr>
-nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep()<cr>
-nnoremap <leader>fb <cmd>lua require('telescope.builtin').buffers()<cr>
+nnoremap <C-p> <cmd>lua require('telescope.builtin').find_files({hidden=false})<cr>
+nnoremap <C-t> <cmd>lua require('telescope.builtin').find_files({hidden=true, no_ignore=true})<cr>
+nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep({hidden=false})<cr>
+nnoremap <leader>FG <cmd>lua require('telescope.builtin').live_grep({hidden=true, no_ignore=true})<cr>
+nnoremap <leader>b <cmd>lua require('telescope.builtin').buffers()<cr>
 nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
 
 " nnoremap <C-p> :GFiles<CR>
@@ -51,10 +67,15 @@ nnoremap <leader>+ :res +5<CR>
 nnoremap <leader>- :res -5<CR>
 nnoremap <leader>> :vertical res +5<CR>
 nnoremap <leader>< :vertical res -5<CR>
+nnoremap gh :vertical wincmd F<CR>
 
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
 nnoremap <leader>p :Prettier<CR>
 nnoremap <leader>o :CocCommand tsserver.organizeImports<CR>
+
+command! -nargs=0 Format :call CocAction('format')
+nnoremap <leader>p :Format<CR>
+
 
 " let g:coc_suggest_disable=1
 let g:coc_global_extensions = ['coc-tsserver']
@@ -65,7 +86,9 @@ nmap <leader>gr <Plug>(coc-references)
 nmap <leader>rr <Plug>(coc-rename)
 nmap <leader>g[ <Plug>(coc-diagnostic-prev)
 nmap <leader>g] <Plug>(coc-diagnostic-next)
-nmap <leader>f <Plug>(coc-fix-current)
+nmap <leader>ff <Plug>(coc-fix-current)
+nnoremap <leader>f :CocAction quickfix<CR>
+nnoremap <leader>f <Plug>(coc-codeaction-selected)<CR>
 nmap <silent> <leader>gp <Plug>(coc-diagnostic-prev-error)
 nmap <silent> <leader>gn <Plug>(coc-diagnostic-next-error)
 nnoremap <leader>cr :CocRestart
@@ -90,13 +113,138 @@ autocmd FileType json syntax match Comment +\/\/.\+$+
 autocmd BufRead, BufNewFile COMMIT_EDITMSG set textwidth=72
 
 " using ; instead of : to make easier enter ex/cmd-mode
-nnoremap ; :
-nnoremap : ;
+" nnoremap ; :
+" nnoremap : ;
 
 " shortcut to open vimrc
 nnoremap <leader>vr :e ~/.vim/vimrc<CR>
+
+nnoremap <expr> j v:count ? 'j' : 'gj'
+nnoremap <expr> k v:count ? 'k' : 'gk'
 
 " NERDTree
 nnoremap <leader>nn :NERDTreeToggle<CR>
 nnoremap <leader>nf :NERDTreeFind<CR>
 
+nnoremap <leader>id i<C-R>=substitute(system('uuidgen'), '\n$', '', '')<CR><Esc>
+
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  -- ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  highlight = {
+    enable = true,              -- false will disable the whole extension
+    -- disable = { "c", "rust" },  -- list of language that will be disabled
+  },
+}
+local mark = require("harpoon.mark")
+local ui = require("harpoon.ui")
+vim.keymap.set("n", "<leader>a", mark.add_file)
+vim.keymap.set("n", "<leader>l", ui.toggle_quick_menu)
+
+vim.keymap.set("n", "<leader>s", function() ui.nav_file(1) end)
+vim.keymap.set("n", "<leader>d", function() ui.nav_file(2) end)
+vim.keymap.set("n", "<leader>j", function() ui.nav_file(3) end)
+vim.keymap.set("n", "<leader>k", function() ui.nav_file(4) end)
+
+vim.keymap.set("n", "<leader>cp", ':let @" = expand("%")<CR>')
+
+require("dap-vscode-js").setup({
+  -- node_path = "node", -- Path of node executable. Defaults to $NODE_PATH, and then "node"
+  debugger_path = "/Users/daniel.moura/workspace_cp/vscode-js-debug", -- Path to vscode-js-debug installation.
+  -- debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
+  -- adapters = { 'pwa-node', 'pwa-chrome', 'pwa-msedge', 'node-terminal', 'pwa-extensionHost' }, -- which adapters to register in nvim-dap
+   log_file_path = "/Users/daniel.moura/.cache/nvim/dap_vscode_js.log", -- Path for file logging
+   log_file_level = vim.log.levels.WARN, -- Logging level for output to file. Set to false to disable file logging.
+   log_console_level = vim.log.levels.WARN -- Logging level for output to console. Set to false to disable console output.
+})
+
+for _, language in ipairs({ "typescript", "javascript" }) do
+  require("dap").configurations[language] = {
+            {
+                  type = "pwa-node",
+                  request = "launch",
+                  name = "Launch file",
+                  program = "${file}",
+                  cwd = "${workspaceFolder}",
+                },
+          {
+                  type = "pwa-node",
+                  request = "launch",
+                  name = "Debug Nestjs - local",
+                  trace = true, -- include debugger info
+                  runtimeExecutable = "npm",
+                  runtimeArgs = {
+                      "run",
+                      "start:debug",
+                  },
+                  envFile = ".env",
+                  rootPath = "${workspaceFolder}",
+                  cwd = "${workspaceFolder}",
+                  console = "integratedTerminal",
+                  internalConsoleOptions = "openOnSessionStart",
+          },
+              {
+                      type = "pwa-node",
+                      request = "attach",
+                      mode = "remote",
+                      name = "Attach port - docker",
+                      continueOnAttach = true,
+                      attachExistingChildren = true,
+                      address = "127.0.0.1",
+                      port = 9229,
+                      cwd = "${workspaceFolder}",
+                      localRoot = "${workspaceFolder}",
+                      remoteRoot = "/app",
+              },
+              {
+                      type = "pwa-node",
+                      request = "attach",
+                      mode = "remote",
+                      name = "Attach port - local",
+                      continueOnAttach = true,
+                      attachExistingChildren = true,
+                      address = "127.0.0.1",
+                      port = 9229,
+                      cwd = "${workspaceFolder}",
+              },
+
+  }
+end
+
+    vim.keymap.set('n', '<A-d>', function() require('dap').continue() end)
+    vim.keymap.set('n', '<A-k>', function() require('dap').step_over() end)
+    vim.keymap.set('n', '<A-j>', function() require('dap').step_into() end)
+    vim.keymap.set('n', '<A-l>', function() require('dap').step_out() end)
+    vim.keymap.set('n', '<A-b>', function() require('dap').toggle_breakpoint() end)
+    vim.keymap.set('n', '<A-B>', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end)
+    vim.keymap.set('n', '<A-r>', function() require('dap').repl.open() end)
+    vim.keymap.set({'n', 'v'}, '<A-h>', function()
+      require('dap.ui.widgets').hover()
+    end)
+    vim.keymap.set({'n', 'v'}, '<A-p>', function()
+      require('dap.ui.widgets').preview()
+    end)
+    vim.keymap.set('n', '<A-f>', function()
+      local widgets = require('dap.ui.widgets')
+      widgets.centered_float(widgets.frames)
+    end)
+    vim.keymap.set('n', '<A-s>', function()
+      local widgets = require('dap.ui.widgets')
+      widgets.centered_float(widgets.scopes)
+    end)
+
+    require('nvim-dap-virtual-text').setup()
+
+    vim.keymap.set('i', '<A-a>', '1') 
+    vim.keymap.set('i', '<A-s>', '2') 
+    vim.keymap.set('i', '<A-d>', '3') 
+    vim.keymap.set('i', '<A-f>', '4') 
+    vim.keymap.set('i', '<A-g>', '5') 
+    vim.keymap.set('i', '<A-h>', '6') 
+    vim.keymap.set('i', '<A-j>', '7') 
+    vim.keymap.set('i', '<A-k>', '8') 
+    vim.keymap.set('i', '<A-l>', '9') 
+    vim.keymap.set('i', '<A-;>', '0') 
+
+    vim.keymap.set('i', 'jk', '<Esc>')
+EOF
