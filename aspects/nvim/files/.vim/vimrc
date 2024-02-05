@@ -44,6 +44,9 @@ Plug 'mfussenegger/nvim-dap'
 Plug 'mxsdev/nvim-dap-vscode-js'
 Plug 'theHamsta/nvim-dap-virtual-text'
 Plug 'rcarriga/nvim-dap-ui'
+
+Plug 'habamax/vim-godot'
+
 call plug#end()
 colorscheme gruvbox
 set background=dark
@@ -138,7 +141,8 @@ require'nvim-treesitter.configs'.setup {
 }
 local mark = require("harpoon.mark")
 local ui = require("harpoon.ui")
-vim.keymap.set("n", "<leader>a", mark.add_file)
+local tmux = require("harpoon.tmux")
+vim.keymap.set("n", "<lkader>a", mark.add_file)
 vim.keymap.set("n", "<leader>l", ui.toggle_quick_menu)
 
 vim.keymap.set("n", "<leader>s", function() ui.nav_file(1) end)
@@ -147,6 +151,12 @@ vim.keymap.set("n", "<leader>j", function() ui.nav_file(3) end)
 vim.keymap.set("n", "<leader>k", function() ui.nav_file(4) end)
 
 vim.keymap.set("n", "<leader>cp", ':let @" = expand("%")<CR>')
+vim.keymap.set("n", "<leader>t", 
+    function() 
+        tmux.sendCommand(3, "docker-compose -f docker-compose.cicd.yml run -w /var/app/src app ./vendor/phpunit/phpunit/phpunit tests/Unit --testdox --colors always --verbose") 
+        tmux.gotoTerminal(3)
+    end
+)
 
 require("dap-vscode-js").setup({
   -- node_path = "node", -- Path of node executable. Defaults to $NODE_PATH, and then "node"
@@ -166,6 +176,37 @@ for _, language in ipairs({ "typescript", "javascript" }) do
                   name = "Launch file",
                   program = "${file}",
                   cwd = "${workspaceFolder}",
+                },
+            {
+                  type = "pwa-node",
+                  request = "launch",
+                  name = "Launch npm run test",
+                  program = "${file}",
+                  runtimeExecutable = "npm",
+                  runtimeArgs = {
+                          "run",
+                          "test"
+                      },
+                  cwd = "${workspaceFolder}",
+                    console = "integratedTerminal",
+                },
+            {
+                  type = "pwa-node",
+                  request = "launch",
+                  name = "Launch npm run test-only",
+                  program = "${file}",
+                  runtimeExecutable = "npm",
+                  runtimeArgs = function() 
+                      command = {
+                          "run",
+                          "test-only"
+                      }
+                      
+                      table.insert(command, vim.fn.input('tests args: '))
+                      return command
+                  end,
+                  cwd = "${workspaceFolder}",
+                    console = "integratedTerminal",
                 },
           {
                   type = "pwa-node",
@@ -216,7 +257,7 @@ end
     vim.keymap.set('n', '<A-j>', function() require('dap').step_into() end)
     vim.keymap.set('n', '<A-l>', function() require('dap').step_out() end)
     vim.keymap.set('n', '<A-b>', function() require('dap').toggle_breakpoint() end)
-    vim.keymap.set('n', '<A-B>', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end)
+    vim.keymap.set('n', '<A-B>', function() require('dap').set_breakpoint(vim.fn.input('condition: '), nil, nil) end)
     vim.keymap.set('n', '<A-r>', function() require('dap').repl.open() end)
     vim.keymap.set({'n', 'v'}, '<A-h>', function()
       require('dap.ui.widgets').hover()
